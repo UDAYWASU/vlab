@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "../api/client";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type LoginResult = {
   access_token: string;
@@ -16,6 +17,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,8 +32,10 @@ export default function LoginPage() {
       });
 
       // Temporary MVP storage. Prefer secure HttpOnly cookies for production.
-      sessionStorage.setItem("vlab_access_token", result.access_token);
-      window.location.assign("/branches");
+    sessionStorage.setItem("vlab_access_token", result.access_token);
+        
+    const from = location.state?.from?.pathname || "/branches";
+    navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
